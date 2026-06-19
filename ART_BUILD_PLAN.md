@@ -19,7 +19,11 @@ Status as of 2026-06-19. Goal: build FNAL **art v3_14_04 + ROOT I/O** as
   pinned `libboost-devel 1.85.*` to match WCT), libsqlite, openssl, cetlib_except.
   `-Werror` clean even on the big surface. OpenSSL was undeclared in product_deps
   (potential_improvements #4).
-- [ ] #4 fhiclcpp · #5 messagefacility · #6 canvas ·
+- [x] **#4 fhiclcpp** 4.18.04 — GREEN (needed a patch). cetlib + tbb + transitive
+  cetlib closure (boost/sqlite/openssl/cetlib_except via find_dependency). First
+  failure→patch→green: missing `#include <cassert>` in DatabaseSupport.cc
+  (`patches/0001-...`, potential_improvements #5). `-Werror` itself clean.
+- [ ] #5 messagefacility · #6 canvas ·
   #7 canvas_root_io · #8 art · #9 art_root_io — TODO.
 
 Reusable build invocation (from `conda/`):

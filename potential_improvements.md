@@ -80,4 +80,19 @@ Format: one entry per finding — what, where, why it bites, suggested fix.
   cetlib's `product_deps` so the declared dep graph matches the CMake reality.
 - **Recipe workaround:** add `openssl` to `host:`.
 
+## 5. Missing `#include <cassert>` (fhiclcpp)
+
+- **Where:** `fhiclcpp/DatabaseSupport.cc` calls `assert()` (line ~23) but never
+  includes `<cassert>`. (Watch for the same missing-standard-header class of bug
+  in other products — `<cstdint>`, `<cassert>`, `<algorithm>`, `<memory>` are the
+  usual suspects.)
+- **Why it bites:** older libstdc++ pulled `<cassert>` in transitively via other
+  standard headers; newer libstdc++ (conda-forge GCC) does not, so the build
+  fails with `'assert' was not declared in this scope`. This is a latent
+  correctness bug, not a warning — `-Werror` is irrelevant here.
+- **Suggested fix:** add the explicit `#include <cassert>` upstream (and audit
+  the suite for other implicit standard-header reliance).
+- **Recipe workaround:** carry a patch adding the include
+  (`patches/0001-DatabaseSupport-include-cassert.patch`).
+
 <!-- Add new findings above this line as the climb up the dep graph continues. -->
