@@ -22,7 +22,7 @@ source:
   sha256: 230c0d5d5082e878e1afa7fe9b5b54e52f9ec70373c7000a5775351817fb95d7
 
 build:
-  number: 0
+  number: 2                      # _2: also strip stray $PREFIX/{INSTALL,LICENSE,README} (README vs ROOT README/ dir -> ENOTDIR at #7). _1: pin openssl 3.x for ROOT
   script: build.sh
   skip: not linux
 
@@ -42,10 +42,14 @@ requirements:
     # boost v1_82_0; 1.85 still provides all three compiled components.)
     - libboost-devel 1.85.*
     - libsqlite                  # find_package(SQLite3) -> SQLite::SQLite3 (UPS sqlite v3_40_01_00)
-    - openssl                    # find_package(OpenSSL) -> OpenSSL::Crypto, REQUIRED on
+    - openssl >=3.2,<4.0a0       # find_package(OpenSSL) -> OpenSSL::Crypto, REQUIRED on
                                  #   non-Apple but ABSENT from product_deps (see
-                                 #   potential_improvements.md). conda openssl is 3.x;
-                                 #   cetlib sets OPENSSL_API_COMPAT for >=3.0 itself.
+                                 #   potential_improvements.md). PINNED to 3.x: conda-forge
+                                 #   root 6.28.10 needs openssl <4, and cetlib is the only
+                                 #   direct openssl user, so its run_export must stay 3.x or
+                                 #   the whole ROOT-containing env can't resolve (openssl 3
+                                 #   and 4 are different sonames). cetlib sets
+                                 #   OPENSSL_API_COMPAT for >=3.0 itself.
     # No catch2 / hep_concurrency: both are test-only here and BUILD_TESTING=OFF.
   run:
     # boost / sqlite / openssl / cetlib_except runtimes arrive via run_exports of
@@ -67,6 +71,8 @@ tests:
 
 about:
   homepage: https://github.com/art-framework-suite/cetlib
+  license: BSD-3-Clause
+  license_file: LICENSE
   summary: cetlib -- core utility library (plugins, filesystem, digests, sqlite) for the FNAL art suite
   description: |
     cetlib provides foundational utilities for the Fermilab art framework suite:

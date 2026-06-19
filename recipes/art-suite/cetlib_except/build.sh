@@ -21,3 +21,13 @@ cmake \
   "$SRC_DIR"
 
 make -j"${CPU_COUNT:-1}" install
+
+# Like cetmodules, cetlib_except installs INSTALL/LICENSE/README as plain files
+# at the PREFIX ROOT. $PREFIX/README (a file) collides with ROOT's $PREFIX/README/
+# directory (ReleaseNotes/...) -- a file-vs-directory clash that fails host_env
+# linking with ENOTDIR ("Not a directory") the moment both land in one env, i.e.
+# at canvas_root_io (#7), the first ROOT-dependent product. Strip the stray
+# prefix-root docs. (license_file: LICENSE in recipe.yaml copies LICENSE from the
+# SOURCE into info/licenses, so this $PREFIX strip does not affect it.)
+# See conda/potential_improvements.md (#7).
+rm -f "$PREFIX/INSTALL" "$PREFIX/LICENSE" "$PREFIX/README"

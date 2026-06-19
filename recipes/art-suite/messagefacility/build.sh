@@ -1,12 +1,15 @@
 #!/bin/bash
-# fhiclcpp: the FHiCL configuration language library + CLI tools. Same cetmodules
-# build pattern. find_package(cetlib) transitively pulls cetlib's exported deps
-# (boost/sqlite/openssl/cetlib_except), all present in the host env.
+# messagefacility: the art-suite message logging library (MF_MessageLogger).
+# Same cetmodules build pattern; find_package(fhiclcpp/cetlib/Catch2) resolve from
+# the host env (local channel + conda-forge).
 set -euo pipefail
 
 mkdir -p build
 cd build
 
+# CMAKE_PREFIX_PATH=$PREFIX so find_package() resolves cetmodules + cetlib_except
+# (local art-suite channel) and Boost/SQLite3/OpenSSL (conda-forge) from the host
+# env. BUILD_TESTING=OFF -> skip the test/ subdir (the only Catch2 user).
 cmake \
   -DCMAKE_INSTALL_PREFIX="$PREFIX" \
   -DCMAKE_PREFIX_PATH="$PREFIX" \

@@ -1,7 +1,7 @@
 #!/bin/bash
-# fhiclcpp: the FHiCL configuration language library + CLI tools. Same cetmodules
-# build pattern. find_package(cetlib) transitively pulls cetlib's exported deps
-# (boost/sqlite/openssl/cetlib_except), all present in the host env.
+# canvas: the art suite's data-product/persistency model (the last pure-C++
+# product before ROOT). Same cetmodules build pattern; find_package resolves
+# the sibling closure + CLHEP/Range-v3/Boost from the host env.
 set -euo pipefail
 
 mkdir -p build

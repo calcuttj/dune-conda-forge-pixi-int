@@ -27,7 +27,7 @@ source:
   sha256: 72ed76819ce98c1629e55931a939374d386070b77070b849e029d095097240fd
 
 build:
-  number: 0
+  number: 1   # _1: strip stray $PREFIX/{INSTALL,LICENSE,README}; README file vs ROOT's README/ dir -> ENOTDIR at #7
   script: build.sh
   # Compiled C++ (libcetlib_except.so); art suite is developed/tested on linux.
   skip: not linux

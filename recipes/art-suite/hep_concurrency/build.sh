@@ -19,3 +19,9 @@ cmake \
   "$SRC_DIR"
 
 make -j"${CPU_COUNT:-1}" install
+
+# Strip stray prefix-root docs: $PREFIX/README (file) collides with ROOT's
+# $PREFIX/README/ directory at canvas_root_io (#7) -- ENOTDIR / EPERM at host_env
+# link/package time. (license_file: copies LICENSE from the SOURCE, not from here.)
+# See conda/potential_improvements.md (#7) and the check-prefix-collisions skill.
+rm -f "$PREFIX/INSTALL" "$PREFIX/LICENSE" "$PREFIX/README"

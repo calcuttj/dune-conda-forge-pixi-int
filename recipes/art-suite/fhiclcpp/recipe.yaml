@@ -27,7 +27,7 @@ source:
     - patches/0001-DatabaseSupport-include-cassert.patch
 
 build:
-  number: 0
+  number: 2                      # _2: strip stray $PREFIX/{INSTALL,LICENSE,README} (README vs ROOT README/ dir at #7). _1: drop openssl from host (ROOT openssl<4 compat)
   script: build.sh
   skip: not linux
 
@@ -45,9 +45,11 @@ requirements:
     - tbb-devel 2021.9.*         # find_package(TBB) (UPS pin tbb v2021_9_0)
     - libboost-devel 1.85.*      # find_package(Boost program_options); matches WCT pin
     - libsqlite                  # find_package(SQLite3)
-    - openssl                    # not used directly, but cetlibConfig.cmake does
-                                 #   find_dependency(OpenSSL) for its PUBLIC
-                                 #   OpenSSL::Crypto, so it must resolve here too.
+    # NOTE: openssl is intentionally NOT listed. It is cetlib's private dependency
+    # (only libcetlib.so links libcrypto). cetlib already run-requires openssl 3.x,
+    # so it is present transitively in the host env (cetlibConfig's
+    # find_dependency(OpenSSL) resolves). Listing it here would wrongly attach
+    # openssl's run_export to fhiclcpp and clash with ROOT's openssl<4 downstream.
   run:
     # Runtimes (cetlib/cetlib_except/boost/sqlite/openssl/tbb) arrive via the host
     # packages' run_exports; add explicit pins only if a missing .so appears.
@@ -69,6 +71,8 @@ tests:
 
 about:
   homepage: https://github.com/art-framework-suite/fhicl-cpp
+  license: BSD-3-Clause
+  license_file: LICENSE
   summary: fhiclcpp -- FHiCL configuration language library and tools for the FNAL art suite
   description: |
     fhiclcpp implements FHiCL (the Fermilab Hierarchical Configuration

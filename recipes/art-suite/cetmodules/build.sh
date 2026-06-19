@@ -16,3 +16,10 @@ cmake \
   "$SRC_DIR"
 
 make -j"${CPU_COUNT:-1}" install
+
+# cetmodules installs INSTALL/LICENSE/README as plain files at the PREFIX ROOT,
+# polluting the environment root. This collides with other packages that use
+# those paths as directories -- notably ROOT, which installs $PREFIX/README/
+# (ReleaseNotes/...): a file-vs-directory clash (ENOTDIR) when both land in one
+# env. Remove the stray prefix-root docs. See conda/potential_improvements.md (#7).
+rm -f "$PREFIX/INSTALL" "$PREFIX/LICENSE" "$PREFIX/README"

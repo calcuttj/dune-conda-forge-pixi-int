@@ -58,9 +58,11 @@ tests:
 about:
   homepage: https://github.com/art-framework-suite/hep-concurrency
   license: BSD-3-Clause
-  # NOTE: hep-concurrency v1_09_02 ships no LICENSE file in the tarball (unlike
-  # cetlib_except), so no license_file is given. It is the same FNAL BSD-3-Clause
-  # license as the rest of the suite. See potential_improvements.md.
+  # hep-concurrency v1_09_02 ships NO LICENSE file in its tarball (upstream
+  # packaging omission). It is the same FNAL BSD-3-Clause text as every other
+  # art-framework-suite product (byte-identical across the suite), so we vendor a
+  # copy into this recipe dir and reference it. See potential_improvements.md (#3).
+  license_file: LICENSE
   summary: hep_concurrency -- thread-safe task queues and concurrency utilities for the FNAL art suite
   description: |
     hep_concurrency provides SerialTaskQueue, WaitingTask/WaitingTaskList,

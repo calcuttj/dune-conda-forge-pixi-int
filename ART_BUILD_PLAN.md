@@ -23,17 +23,87 @@ Status as of 2026-06-19. Goal: build FNAL **art v3_14_04 + ROOT I/O** as
   cetlib closure (boost/sqlite/openssl/cetlib_except via find_dependency). First
   failure→patch→green: missing `#include <cassert>` in DatabaseSupport.cc
   (`patches/0001-...`, potential_improvements #5). `-Werror` itself clean.
-- [ ] #5 messagefacility · #6 canvas ·
-  #7 canvas_root_io · #8 art · #9 art_root_io — TODO.
+- [x] **#5 messagefacility** 2.10.05 — GREEN, no patch. fhiclcpp+cetlib+cetlib_except
+  +boost, and Catch2 is UNCONDITIONAL+EXPORT here (host catch2 3.3.*, propagates).
+  lib MF_MessageLogger; script fix-mf-macros.
+- [x] **#6 canvas** 3.16.04 — GREEN (needed a patch). clhep + range-v3 + boost
+  date_time + full sibling closure. FIRST time `-Werror` bit: RangeSet.cc ignores
+  std::unique's [[nodiscard]] result; dropped WERROR (`patches/0001-drop-WERROR.patch`,
+  potential_improvements #6) rather than alter logic. All pure-C++ products done.
+- [x] **#7 canvas_root_io** 1.13.05 — GREEN. First ROOT product. Fix for the
+  README/ROOT-dir collision: `cet_cmake_env(NO_INSTALL_PKGMETA)` via
+  `patches/0002-no-install-pkgmeta.patch` (see potential_improvements #7); plus
+  `-D_CheckClassVersion_ENABLED=FALSE` (#8). NOT a rattler bug (was misdiagnosed).
+- [x] **#8 art** 3.14.04 — GREEN (4 patches). Largest product; full sibling
+  closure (canvas/hep_concurrency/messagefacility/fhiclcpp/cetlib(_except)) +
+  CLHEP/Range-v3/TBB/Boost. Patches: `0001-drop-WERROR` (VIGILANT+WERROR, same as
+  canvas), `0002-add-algorithm-includes` (11 files, std::any_of/find_if w/o
+  `<algorithm>`), `0003-add-cassert-includes` (22 files), `0004-add-cstdint-limits`.
+  **TBB pin = `2021.9.*` (NOT a floor):** art links hep_concurrency's
+  `WaitingTaskList(tbb::detail::dN::task_group&)` — the versioned inline namespace
+  bumps between TBB releases, so a `>=2021.9` floor floated to 2023.0 and gave an
+  undefined-reference link error vs the 2021.9-built hep_concurrency. See
+  potential_improvements.md #9 (includes) and #10 (TBB ABI + ⚠ ROOT tension).
+  Built execs: art/gm2/lar/nova. Artifact in `art-suite-output/linux-64/`.
+- [x] **#9 art_root_io** 1.13.05 — GREEN (first build, no failed iterations).
+  FINAL product: ROOT event I/O for art (RootInput/RootOutput/TFileService +
+  art's ROOT dictionaries). Combines ROOT (#7 pattern) with the full art
+  framework (#8). 3 patches: `0001-drop-WERROR`, `0002-no-install-pkgmeta`
+  (README-vs-ROOT-dir, same as #7), `0003-add-standard-includes` (23 files:
+  algorithm/cassert/cstdint/limits, computed per-file in one patch). build.sh
+  uses `_CheckClassVersion_ENABLED=FALSE` (PyROOT sandbox, #7/#8). Execs:
+  product_sizes_dumper/config_dumper/count_events/file_info_dumper/
+  sam_metadata_dumper. Artifact in `art-suite-output/linux-64/`.
+  **TBB-vs-ROOT tension RESOLVED (empirically):** host solve gave root 6.28.10 +
+  **tbb 2022.3.0**, and art (built @2021.9) linked cleanly against it — oneTBB's
+  task_group inline namespace is still `d1` at 2022.3 (the `d2` bump that broke
+  the #8 link was only at 2023.0). No rebuild of hep_concurrency/art needed; the
+  `tbb-devel >=2021.9` float (NOT `==`) is correct for the ROOT-era products.
+  See pot._impr. #10.
+
+**🎉 STACK COMPLETE — all of #0–#9 (art v3_14_04 + ROOT I/O) are GREEN.**
+Remaining follow-ups (NOT blockers): (1) ~~licenses batch pass~~ ✅ DONE
+2026-06-19 (all 10 recipes declare `license: BSD-3-Clause` + `license_file:
+LICENSE`; the two tarballs that omit LICENSE — hep_concurrency, art_root_io —
+get a vendored copy in the recipe dir; see pot._impr. #3); (2) `wct_downstream`
+rebuild was deferred earlier.
+
+**⏸ PARKED TODO — incomplete conda RUN-dependency graph (run_exports).**
+Validated 2026-06-19 via an end-to-end pixi env on `art_root_io`: it solved/
+installed, but the runtime closure pulled in ONLY external leaf deps (clhep/
+boost/sqlite/tbb) — **not root, and not any art-suite sibling** (art, canvas,
+canvas_root_io, cet*). Cause: recipes have empty `run:` sections and rely on
+run_exports, but our cet*/art recipes define none, so nothing propagates. The
+*build* graph is correct and complete (suite builds + links fine); only the
+*run* graph is empty. Upstream is fine — `product_deps` declares the full
+hierarchy; we just didn't translate it.
+- **Fix mechanism (clear, larsoft-agnostic):** add `build.run_exports:
+  - ${{ pin_subpackage(name, upper_bound=...) }}` to each RUNTIME library
+  (cetlib_except/cetlib/fhiclcpp/hep_concurrency/messagefacility/canvas/
+  canvas_root_io/art/art_root_io) — NOT cetmodules (noarch build system) or
+  test-only deps — plus explicit `run: - root 6.28.10.*` on the two ROOT
+  products. Then re-run the pixi solve; it should pull art+root+all siblings.
+- **Why PARKED (decision 2026-06-19):** the *policy* — run_export pin tightness,
+  whether a metapackage/bundle is the intended install target, root pinning across
+  the stack — is best dictated by LarSoft (the next integration target and the
+  actual top of the hierarchy; `art_root_io` is a MIDDLE layer, not the top).
+  Settle run_exports when scoping larsoft rather than guessing now + rebuilding
+  twice. Full rationale: memory `conda-run-exports-policy`.
+- Validation scaffold left in scratchpad: `…/scratchpad/art-validate/pixi.toml`
+  (channels = local art-suite-output + conda-forge, dep = art_root_io).
+- Side note: the local channel `repodata.json` had to be hand-patched after the
+  license rebuilds overwrote .conda files (rattler-build didn't refresh the
+  sha256/size on same-name overwrite). A `.bak` sits beside each repodata.json.
 
 Reusable build invocation (from `conda/`):
 `rattler-build build --recipe recipes/art-suite/<pkg>/recipe.yaml -c ./art-suite-output -c conda-forge --allow-symlinks-on-windows`
 
-**DEFERRED — licenses (do as a later batch step, NOT per-package):** per user
-(2026-06-19), do not hunt license files or verify SPDX while building the
-packages. New recipes omit `license_file:` (and don't block on it). Revisit all
-products' `about.license`/`license_file` together once the suite builds. The
-LICENSE-presence inconsistency is logged in `potential_improvements.md` (#3).
+**LICENSES — ✅ DONE (2026-06-19, batch step after the suite built).** All 10
+products declare `license: BSD-3-Clause` + `license_file: LICENSE`. The FNAL BSD
+text is byte-identical across the suite; hep_concurrency and art_root_io omit it
+upstream so a vendored copy lives in their recipe dirs. (Originally deferred per
+user: don't hunt licenses while building — revisited together once green.) See
+`potential_improvements.md` (#3).
 
 ## Decisions locked in
 - **Packaging style:** rattler-build conda packages (one recipe per product),
