@@ -1,0 +1,23 @@
+#!/bin/bash
+# cetlib_except: small C++ exception library, first real consumer of cetmodules.
+# This build.sh is the template for the rest of the art suite -- a plain CMake
+# project that find_package(cetmodules)es and uses its macros.
+set -euo pipefail
+
+mkdir -p build
+cd build
+
+# CMAKE_PREFIX_PATH=$PREFIX so find_package(cetmodules) + find_package(Catch2)
+# resolve against the host env (where the local-channel cetmodules + conda-forge
+# catch2 are installed). BUILD_TESTING=OFF: don't build/run the unit tests
+# (catch2 is still required at configure time for the always-built
+# cetlib_except::Catch2Matchers interface target).
+cmake \
+  -DCMAKE_INSTALL_PREFIX="$PREFIX" \
+  -DCMAKE_PREFIX_PATH="$PREFIX" \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_TESTING=OFF \
+  -DWANT_UPS:BOOL=OFF \
+  "$SRC_DIR"
+
+make -j"${CPU_COUNT:-1}" install

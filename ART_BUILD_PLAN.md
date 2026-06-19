@@ -1,7 +1,35 @@
 # art v3_14_04 — conda packaging plan
 
-Status as of 2026-06-18. Goal: build FNAL **art v3_14_04 + ROOT I/O** as
+Status as of 2026-06-19. Goal: build FNAL **art v3_14_04 + ROOT I/O** as
 **rattler-build conda packages**, managed by pixi. LArSoft is out of scope.
+
+## BUILD PROGRESS (climbing the dep table below)
+- [x] **#0 cetmodules** 3.24.01 — GREEN. `noarch`, FNALssi dotted tag, needs
+  `--allow-symlinks-on-windows`. Artifact in `art-suite-output/noarch/`.
+- [x] **#1 cetlib_except** 1.09.01 — GREEN. Validated the cetmodules-consumer
+  CMake pattern end-to-end (cetmodules from local channel). `-Werror` did NOT
+  bite. host deps: `cetmodules` + `catch2 3.3.*` (catch2 needed at configure —
+  see `potential_improvements.md`). Config installs to `lib/<proj>/cmake/`.
+  `recipes/art-suite/cetlib_except/{recipe.yaml,build.sh,variants.yaml}` is the
+  template for the remaining compiled C++ products.
+- [x] **#2 hep_concurrency** 1.09.02 — GREEN. First sibling link (cetlib_except
+  from local channel) + first external link (TBB / `tbb-devel 2021.9.*`). catch2
+  NOT needed (test-only). `-Werror` clean. No LICENSE in tarball.
+- [x] **#3 cetlib** 3.18.02 — GREEN. boost (regex/program_options/filesystem,
+  pinned `libboost-devel 1.85.*` to match WCT), libsqlite, openssl, cetlib_except.
+  `-Werror` clean even on the big surface. OpenSSL was undeclared in product_deps
+  (potential_improvements #4).
+- [ ] #4 fhiclcpp · #5 messagefacility · #6 canvas ·
+  #7 canvas_root_io · #8 art · #9 art_root_io — TODO.
+
+Reusable build invocation (from `conda/`):
+`rattler-build build --recipe recipes/art-suite/<pkg>/recipe.yaml -c ./art-suite-output -c conda-forge --allow-symlinks-on-windows`
+
+**DEFERRED — licenses (do as a later batch step, NOT per-package):** per user
+(2026-06-19), do not hunt license files or verify SPDX while building the
+packages. New recipes omit `license_file:` (and don't block on it). Revisit all
+products' `about.license`/`license_file` together once the suite builds. The
+LICENSE-presence inconsistency is logged in `potential_improvements.md` (#3).
 
 ## Decisions locked in
 - **Packaging style:** rattler-build conda packages (one recipe per product),
