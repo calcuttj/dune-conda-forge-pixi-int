@@ -10,11 +10,10 @@
 # they come back later as build variants (see the note at the bottom).
 
 context:
-  name: wire-cell-toolkit
   version: "0.36.1"
 
 package:
-  name: ${{ name }}
+  name: wire-cell-toolkit
   version: ${{ version }}
 
 source:
@@ -35,6 +34,32 @@ build:
   script: build.sh
   # WCT/waf is developed and tested on linux; skip the build on osx/win.
   skip: not linux
+  # --- osx support (NOT enabled yet) -------------------------------------
+  # Windows is genuinely unsupported (bash build.sh + the waf/./wcb driver),
+  # so a Windows skip is permanent. osx has NO fundamental blocker -- WCT is
+  # portable C++/waf and every dep below ships osx-64/osx-arm64 on conda-forge
+  # -- but `skip: win` alone will NOT build clean on osx. The obstacle is the
+  # release-mode strict flags, which are tuned for GCC:
+  #   * waft/wcb.py adds "-Werror -Wall -Werror=return-type -pedantic ..."
+  #     unconditionally in release mode (is_development() is false for a
+  #     digit-leading version like 0.36.1). clang emits a DIFFERENT warning
+  #     set than GCC 13/14, so it hits its own -Werror sites that the GCC
+  #     patches (0001-0003) don't cover.
+  #   * build.sh's `-Wno-error=dangling-reference` (CXXFLAGS) is a GCC-13+
+  #     -only flag; clang treats it as an unknown-warning-option.
+  # To enable osx:
+  #   1. change skip to `win` (or `not unix`);
+  #   2. make build.sh compiler-aware: gate -Wno-error=dangling-reference to
+  #      linux/gcc, and on osx append a blanket `-Wno-error` to demote clang's
+  #      release warnings to warnings (release -Werror can't be turned off via
+  #      a waf option -- it's gated on the version, not a flag);
+  #   3. expect 1-2 clang-specific source patches once the first osx compile
+  #      surfaces its warning sites;
+  #   4. confirm the dep solve on osx-arm64 (libjsonnet/go-jsonnet especially).
+  # CANNOT be validated from a linux host: rattler-build can't emit osx
+  # packages without an osx runner (and build_locally.py needs Docker). Needs
+  # conda-forge osx CI or a Mac to prove green.
+  # -----------------------------------------------------------------------
 
 requirements:
   build:
