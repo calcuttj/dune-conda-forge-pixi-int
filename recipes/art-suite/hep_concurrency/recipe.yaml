@@ -10,12 +10,11 @@
 # WaitingTask(List) and thread-safety utilities used by art's concurrency layer.
 
 context:
-  name: hep_concurrency
   version: "1.09.02"
   git_tag: v1_09_02
 
 package:
-  name: ${{ name }}
+  name: hep_concurrency
   version: ${{ version }}
 
 source:

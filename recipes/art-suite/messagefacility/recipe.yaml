@@ -8,12 +8,11 @@
 # The art suite's message-logging library (MF_MessageLogger) + message services.
 
 context:
-  name: messagefacility
   version: "2.10.05"
   git_tag: v2_10_05
 
 package:
-  name: ${{ name }}
+  name: messagefacility
   version: ${{ version }}
 
 source:

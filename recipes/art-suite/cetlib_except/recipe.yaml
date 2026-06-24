@@ -14,12 +14,11 @@
 # underscore UPS form, unlike FNALssi/cetmodules which uses dotted tags).
 
 context:
-  name: cetlib_except
   version: "1.09.01"
   git_tag: v1_09_01
 
 package:
-  name: ${{ name }}
+  name: cetlib_except
   version: ${{ version }}
 
 source:

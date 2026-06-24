@@ -9,12 +9,11 @@
 # helpers, MD5/SHA1/CRC digests, SQLite helpers, parsed program options.
 
 context:
-  name: cetlib
   version: "3.18.02"
   git_tag: v3_18_02
 
 package:
-  name: ${{ name }}
+  name: cetlib
   version: ${{ version }}
 
 source:

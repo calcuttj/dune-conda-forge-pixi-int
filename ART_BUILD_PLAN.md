@@ -3,6 +3,14 @@
 Status as of 2026-06-19. Goal: build FNAL **art v3_14_04 + ROOT I/O** as
 **rattler-build conda packages**, managed by pixi. LArSoft is out of scope.
 
+> **See also:** `CETMODULES_NOARCH_HANDOFF.md` — converts the *feedstock*
+> cetmodules recipe to `noarch: generic`, builds it, and serves it from a local
+> `file://` channel. ⚠️ Flags that **two** cetmodules recipes now exist with
+> **different install layouts** (this plan's `recipes/art-suite/cetmodules`
+> installs to `lib/cetmodules/`; the feedstock one installs to
+> `share/cetmodules/`) — reconcile before repointing dependents. Dependents all
+> list `cetmodules` in `host:`.
+
 ## BUILD PROGRESS (climbing the dep table below)
 - [x] **#0 cetmodules** 3.24.01 — GREEN. `noarch`, FNALssi dotted tag, needs
   `--allow-symlinks-on-windows`. Artifact in `art-suite-output/noarch/`.

@@ -10,12 +10,11 @@
 # product; art_root_io (#9) adds ROOT event I/O on top.
 
 context:
-  name: art
   version: "3.14.04"
   git_tag: v3_14_04
 
 package:
-  name: ${{ name }}
+  name: art
   version: ${{ version }}
 
 source:

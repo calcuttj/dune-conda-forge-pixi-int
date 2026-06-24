@@ -9,12 +9,11 @@
 # plus its CLI tools (fhicl-dump, fhicl-expand, fhicl-get, fhicl-write-db).
 
 context:
-  name: fhiclcpp
   version: "4.18.04"
   git_tag: v4_18_04
 
 package:
-  name: ${{ name }}
+  name: fhiclcpp
   version: ${{ version }}
 
 source:

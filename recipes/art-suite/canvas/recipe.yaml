@@ -9,12 +9,11 @@
 # the last pure-C++ product before ROOT enters (canvas_root_io is #7).
 
 context:
-  name: canvas
   version: "3.16.04"
   git_tag: v3_16_04
 
 package:
-  name: ${{ name }}
+  name: canvas
   version: ${{ version }}
 
 source:

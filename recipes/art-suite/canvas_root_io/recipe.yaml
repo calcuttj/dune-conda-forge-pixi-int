@@ -10,12 +10,11 @@
 # cetmodules build_dictionary -> rootcling.
 
 context:
-  name: canvas_root_io
   version: "1.13.05"
   git_tag: v1_13_05
 
 package:
-  name: ${{ name }}
+  name: canvas_root_io
   version: ${{ version }}
 
 source:

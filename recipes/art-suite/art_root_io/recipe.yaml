@@ -11,12 +11,11 @@
 # #7), and the first to combine ROOT with the full art framework (#8).
 
 context:
-  name: art_root_io
   version: "1.13.05"
   git_tag: v1_13_05
 
 package:
-  name: ${{ name }}
+  name: art_root_io
   version: ${{ version }}
 
 source:
