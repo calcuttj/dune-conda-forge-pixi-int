@@ -22,12 +22,13 @@ source:
 build:
   number: 0
   # Pure Python/shell scripts copied into the prefix -- architecture independent.
-  noarch: generic
+  skip:
+    - win
   script: build.sh
 
 requirements:
   run:
-    - python >=3.6
+    - python
     # py-rucio-clients in spack; conda-forge ships it as `rucio-clients`.
     - rucio-clients
     # The clients include bash scripts (justin-sl7-setup/-shell, ...) and assume
@@ -57,3 +58,6 @@ about:
     and friends) and the job-side utilities (jobutils) used to create and manage
     workflows and to upload/fetch data via Rucio/WebDAV/CVMFS.
   repository: https://github.com/DUNE/dune-justin
+extra:
+  recipe-maintainers:
+    - calcuttj
